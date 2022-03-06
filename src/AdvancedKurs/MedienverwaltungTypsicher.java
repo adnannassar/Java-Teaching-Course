@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 public class MedienverwaltungTypsicher {
-    LinkedList<Medium> medien;
+    public LinkedList<Medium> medien;
 
     public MedienverwaltungTypsicher() {
         medien = new LinkedList();

@@ -8,6 +8,8 @@ public class Bild extends Medium {
     private String ort;
     private static final long serialVersionUID = 3l;
 
+    public Bild() {
+    }
 
     public Bild(String titel, int jahr, String ort) {
         super(titel, jahr);
@@ -25,7 +27,7 @@ public class Bild extends Medium {
     @Override
     public void druckeDaten(OutputStream stream) {
         PrintWriter printWriter = new PrintWriter(stream);
-        printWriter.printf("ID = %d \"%s\" aufgenommen im Jahr %d in %s\n" , getId(), getTitel(),getJahr(),ort);
+        printWriter.printf("ID = %d \"%s\" aufgenommen im Jahr %d in %s\n", getId(), getTitel(), getJahr(), ort);
         printWriter.flush();
     }
 
@@ -60,5 +62,10 @@ public class Bild extends Medium {
             System.out.println("not same ort");
             return false;
         }
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + "aufgenommen im Jahr " + getJahr() + " in " + ort;
     }
 }

@@ -55,4 +55,9 @@ public class Audio extends Medium{
             return false;
         }
     }
+
+    @Override
+    public String toString() {
+        return super.toString()+"von "+ interpret + " aus " + getJahr() +" Spieldauer: " + dauer+" sek.";
+    }
 }

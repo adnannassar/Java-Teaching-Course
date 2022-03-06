@@ -12,6 +12,11 @@ public abstract class Medium implements Comparable<Medium>, Serializable{
     private int jahr;
     private static final long serialVersionUID = 1l;
 
+    public Medium(){
+        id = counter;
+        counter++;
+    }
+
     public Medium(String titel, int jahr) {
         id = counter;
         counter++;
@@ -64,5 +69,10 @@ public abstract class Medium implements Comparable<Medium>, Serializable{
     @Override
     public int compareTo(Medium m){
         return this.jahr - m.jahr;
+    }
+
+    @Override
+    public String toString() {
+        return "ID = " + id + " \"" +titel+"\" ";
     }
 }
