@@ -11,9 +11,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
+import javax.swing.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 
 public class MedienVerwaltungFX extends Application {
     MedienverwaltungTypsicher mv = new MedienverwaltungTypsicher();
@@ -22,15 +26,34 @@ public class MedienVerwaltungFX extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        mv.laden();
         MenuBar menuBar = new MenuBar();
 
         Menu dateiMenu = new Menu("Datei");
 
         MenuItem ladenItem = new MenuItem("Laden");
+        ladenItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                mv.laden();
+                refreshListView();
+            }
+        });
         MenuItem speichernItem = new MenuItem("Speichern");
+        speichernItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                mv.speichern();
+            }
+        });
+
         SeparatorMenuItem separator1 = new SeparatorMenuItem();
         MenuItem listInDateiItem = new MenuItem("MedienList in Datei");
+        listInDateiItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                saveLitInTextFile();
+            }
+        });
         SeparatorMenuItem separator2 = new SeparatorMenuItem();
         MenuItem beendenItem = new MenuItem("Beenden");
 
@@ -40,6 +63,12 @@ public class MedienVerwaltungFX extends Application {
         Menu mediumMenu = new Menu("Medium");
         MenuItem audioNeuItem = new MenuItem("Audio neu");
         MenuItem bildNeuItem = new MenuItem("Bild neu");
+        bildNeuItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                addNewBild(stage);
+            }
+        });
         mediumMenu.getItems().addAll(audioNeuItem, bildNeuItem);
 
         Menu anzeigeMenu = new Menu("Anzeige");
@@ -60,10 +89,7 @@ public class MedienVerwaltungFX extends Application {
         bildAufnehmen.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                bild = new Bild();
-                new BildErfassungView(stage, bild).showView();
-                mv.aufnehmen(bild);
-                refreshListView();
+                addNewBild(stage);
             }
         });
         Label label2 = new Label("Bild Aufnehmen");
@@ -74,7 +100,11 @@ public class MedienVerwaltungFX extends Application {
         zeigeAlleMedien.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                mv.zeigeMedien(System.out);
+                if(mv.medien.isEmpty()){
+                    mv.speichern();
+                }
+                mv.laden();
+                refreshListView();
             }
         });
 
@@ -110,12 +140,15 @@ public class MedienVerwaltungFX extends Application {
         hBox8.getChildren().addAll(durchschnitt, label8);
 
         Button beenden = new Button("9");
+
         beenden.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
                 stage.close();
+                System.out.println(actionEvent);
             }
         });
+
         Label label9 = new Label("Beenden");
         HBox hBox9 = new HBox(15);
         hBox9.getChildren().addAll(beenden, label9);
@@ -145,6 +178,41 @@ public class MedienVerwaltungFX extends Application {
     private void refreshListView(){
         listView.getItems().clear();
         listView.getItems().addAll(mv.medien);
+    }
+
+    private void addNewBild (Stage stage){
+        bild = new Bild();
+        new BildErfassungView(stage, bild).showView();
+        mv.aufnehmen(bild);
+        refreshListView();
+    }
+
+    private void saveLitInTextFile(){
+        boolean dateiNameIstGültig = false;
+        do {
+            String fileName = JOptionPane.showInputDialog(null, "Bitte Dateiname eingeben");
+            if (fileName == null) {
+                break;
+            }
+            if (fileName.length() == 0) {
+                int auswahl = JOptionPane.showConfirmDialog(null, "Dateinamen ist leer! Neuen Dateinamen wählen?", "Hinweis", JOptionPane.YES_NO_OPTION);
+                // yes = 0, no = 1
+                if (auswahl == 1) {
+                    break;
+                }
+            } else {
+                dateiNameIstGültig = true;
+                File file = new File(fileName + ".txt");
+                try {
+                    FileOutputStream fileOutputStream = new FileOutputStream(file);
+                    mv.zeigeMedien(fileOutputStream);
+                    System.out.println("Dateien wurden in Liste geschrieben");
+                    System.out.println();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+        } while (!dateiNameIstGültig);
     }
 
     public static void main(String[] args) {

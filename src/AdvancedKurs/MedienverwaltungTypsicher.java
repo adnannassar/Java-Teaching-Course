@@ -1,9 +1,8 @@
 package AdvancedKurs;
 
 import java.io.*;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.*;
+import java.util.stream.Stream;
 
 public class MedienverwaltungTypsicher {
     public LinkedList<Medium> medien;
@@ -36,6 +35,9 @@ public class MedienverwaltungTypsicher {
             }
         }
         minMedium.druckeDaten(System.out);
+
+        medien.stream().min(Comparator.comparingInt(Medium::alter)).get().druckeDaten(System.out);
+
     }
 
     public double berechneErscheinungJahr() {
@@ -45,7 +47,10 @@ public class MedienverwaltungTypsicher {
         while (it.hasNext()) {
             summe += it.next().getJahr();
         }
-        return summe / medien.size();
+        int  i = medien.stream().map(Medium::getJahr).reduce(0, Integer::sum) / medien.size();
+
+        return (double) i;
+
     }
 
     // Try normal
@@ -69,8 +74,14 @@ public class MedienverwaltungTypsicher {
         File file = new File("saved_list.ser");
         try( FileInputStream fileInputStream = new FileInputStream(file);
              ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);) {
-            medien = (LinkedList<Medium>) objectInputStream.readObject();
-            System.out.println("List wurde geladen!");
+            Object tempObject = objectInputStream.readObject();
+            if(tempObject != null){
+                medien = (LinkedList<Medium>)tempObject;
+                System.out.println("List wurde geladen!");
+            }else{
+                System.out.println("Etwsa ist schief gelaufen!");
+            }
+
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
